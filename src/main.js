@@ -3,17 +3,17 @@
 const EVENT_COUNT = 3;
 
 const getMenuTemplate = () => {
-	return (
-		`<nav class="trip-controls__trip-tabs  trip-tabs">
+  return (
+    `<nav class="trip-controls__trip-tabs  trip-tabs">
 			<a class="trip-tabs__btn" href="#">Table</a>
 		 	<a class="trip-tabs__btn  trip-tabs__btn--active" href="#">Stats</a>
 		</nav>`
-	);
-}
+  );
+};
 
 const getFilterTemplate = () => {
-	return (
-		`<form class="trip-filters" action="#" method="get">
+  return (
+    `<form class="trip-filters" action="#" method="get">
 			<div class="trip-filters__filter">
 				<input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" checked>
 				<label class="trip-filters__filter-label" for="filter-everything">Everything</label>
@@ -28,12 +28,12 @@ const getFilterTemplate = () => {
 			</div>
 			<button class="visually-hidden" type="submit">Accept filter</button>
 		</form>`
-	);
-}
+  );
+};
 
 const getSortTemplate = () => {
-	return (
-		`<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
+  return (
+    `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
 			<span class="trip-sort__item  trip-sort__item--day"></span>
 			<div class="trip-sort__item  trip-sort__item--event">
 				<input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event">
@@ -53,12 +53,12 @@ const getSortTemplate = () => {
 			</div>
 			<span class="trip-sort__item  trip-sort__item--offers">Offers</span>
 		 </form>`
-	);
-}
+  );
+};
 
 const getEditTemplate = () => {
-	return (
-		`<form class="event  event--edit" action="#" method="post">
+  return (
+    `<form class="event  event--edit" action="#" method="post">
 			<header class="event__header">
 				<div class="event__type-wrapper">
 					<label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -205,15 +205,15 @@ const getEditTemplate = () => {
 				</section>
 			</section>
 		</form>`
-	);
-}
+  );
+};
 
 const getEventsListTemplate = () => {
   return (
     `<ul class="trip-days">
      </ul>`
   );
-}
+};
 
 const getDayEventsTemplate = () => {
   return (
@@ -226,11 +226,11 @@ const getDayEventsTemplate = () => {
       </ul>
      </li>`
   );
-}
+};
 
 const getEventTemplate = () => {
-	return (
-		`<li class="trip-events__item">
+  return (
+    `<li class="trip-events__item">
 			<div class="event">
 				<div class="event__type">
 					<img class="event__type-icon" width="42" height="42" src="img/icons/taxi.png" alt="Event type icon">
@@ -260,26 +260,26 @@ const getEventTemplate = () => {
 				</button>
 			</div>
 		</li>`
-	);
-}
+  );
+};
 
-const renderHtml = (container, template, place = 'beforeend') => {
+const renderHtml = (container, template, place = `beforeend`) => {
   container.insertAdjacentHTML(place, template);
-}
+};
 
-const controlsContainer = document.querySelector('.trip-main__trip-controls');
-const mainContainer = document.querySelector('.trip-events');
+const controlsContainer = document.querySelector(`.trip-main__trip-controls`);
+const mainContainer = document.querySelector(`.trip-events`);
 
 renderHtml(controlsContainer, getMenuTemplate());
 renderHtml(controlsContainer, getFilterTemplate());
 renderHtml(mainContainer, getSortTemplate());
 renderHtml(mainContainer, getEventsListTemplate());
 
-const eventContainer = mainContainer.querySelector('.trip-days');
+const eventContainer = mainContainer.querySelector(`.trip-days`);
 
 renderHtml(eventContainer, getDayEventsTemplate());
 
-const dayEventsContainer = eventContainer.querySelector('.trip-events__list');
+const dayEventsContainer = eventContainer.querySelector(`.trip-events__list`);
 
 renderHtml(dayEventsContainer, getEditTemplate());
 
