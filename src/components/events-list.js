@@ -5,4 +5,4 @@ const getEventsListTemplate = () => {
   );
 };
 
-export { getEventsListTemplate};
+export {getEventsListTemplate};
