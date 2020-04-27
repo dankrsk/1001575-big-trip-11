@@ -1,19 +1,7 @@
-const getDayEventsTemplate = (date, numberOfDay) => {
-  const MONTH_NAMES = [
-    `JAN`,
-    `FEB`,
-    `MAR`,
-    `APR`,
-    `MAY`,
-    `JUN`,
-    `JUL`,
-    `AUG`,
-    `SEP`,
-    `OCT`,
-    `NOV`,
-    `DEC`,
-  ];
+import {MONTH_NAMES} from '../сonst.js';
+import {createElement} from '../utils.js';
 
+const getDayEventsTemplate = (date, numberOfDay) => {
   const year = date.getFullYear();
   const month = MONTH_NAMES[date.getMonth()];
   const day = date.getDate();
@@ -30,4 +18,29 @@ const getDayEventsTemplate = (date, numberOfDay) => {
   );
 };
 
-export {getDayEventsTemplate};
+class DayEvents {
+  constructor(date, numberOfDay) {
+    this._date = date;
+    this._numberOfDay = numberOfDay;
+
+    this._element = null;
+  }
+
+  getTemplate() {
+    return getDayEventsTemplate(this._date, this._numberOfDay);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
+
+export default DayEvents;
