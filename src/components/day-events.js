@@ -1,5 +1,5 @@
 import {MONTH_NAMES} from '../сonst.js';
-import {createElement} from '../utils.js';
+import {AbstractComponent} from '../components/abstract-component.js';
 
 const getDayEventsTemplate = (date, numberOfDay) => {
   const year = date.getFullYear();
@@ -18,28 +18,16 @@ const getDayEventsTemplate = (date, numberOfDay) => {
   );
 };
 
-class DayEvents {
+class DayEvents extends AbstractComponent {
   constructor(date, numberOfDay) {
+    super();
+
     this._date = date;
     this._numberOfDay = numberOfDay;
-
-    this._element = null;
   }
 
   getTemplate() {
     return getDayEventsTemplate(this._date, this._numberOfDay);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
 
