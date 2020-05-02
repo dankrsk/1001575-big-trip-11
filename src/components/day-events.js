@@ -1,5 +1,5 @@
 import {MONTH_NAMES} from '../сonst.js';
-import {AbstractComponent} from '../components/abstract-component.js';
+import AbstractComponent from '../components/abstract-component.js';
 
 const getDayEventsTemplate = (date, numberOfDay) => {
   const year = date.getFullYear();
