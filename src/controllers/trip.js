@@ -3,28 +3,28 @@ import DayEventsComponent from '../components/day-events.js';
 import EventComponent from '../components/event.js';
 import EventEditComponent from '../components/event-edit.js';
 
-const renderEvent = (dayEventsList, event) => {
-  const eventComponent = new EventComponent(event);
-  const eventEditComponent = new EventEditComponent(event);
-
-  const onRollupButtonClick = () => {
-    replace(eventEditComponent, eventComponent);
-  };
-
-  const onEditFormSubmit = (evt) => {
-    evt.preventDefault();
-    replace(eventComponent, eventEditComponent);
-  };
-
-  eventComponent.setEditButtonClickHandler(onRollupButtonClick);
-  eventEditComponent.seEditFormtSubmitHandler(onEditFormSubmit);
-
-  render(dayEventsList, eventComponent, RenderPosition.BEFOREEND);
-};
-
 class TripController {
   constructor(container) {
     this._container = container;
+  }
+
+  _renderEvent(dayEventsList, event) {
+    const eventComponent = new EventComponent(event);
+    const eventEditComponent = new EventEditComponent(event);
+
+    const onRollupButtonClick = () => {
+      replace(eventEditComponent, eventComponent);
+    };
+
+    const onEditFormSubmit = (evt) => {
+      evt.preventDefault();
+      replace(eventComponent, eventEditComponent);
+    };
+
+    eventComponent.setEditButtonClickHandler(onRollupButtonClick);
+    eventEditComponent.seEditFormtSubmitHandler(onEditFormSubmit);
+
+    render(dayEventsList, eventComponent, RenderPosition.BEFOREEND);
   }
 
   render(events) {
@@ -35,7 +35,7 @@ class TripController {
       const dayEventsList = dayEventsComponent.getElement().querySelector(`.trip-events__list`);
 
       it.forEach((dayEvent) => {
-        renderEvent(dayEventsList, dayEvent);
+        this._renderEvent(dayEventsList, dayEvent);
       });
     });
   }
