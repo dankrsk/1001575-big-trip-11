@@ -1,6 +1,6 @@
-import {getDualFormat} from '../utils.js';
+import {getDualFormat} from '../utils/common.js';
 import {ONE_DAY_IN_MS, ONE_HOUR_IN_MS, ONE_MINUTE_IN_MS} from '../сonst.js';
-import {createElement} from '../utils.js';
+import AbstractComponent from '../components/abstract-component.js';
 
 const getEventWithAction = (type) => {
   if (type === `Check-in` || type === `Sightseeing` || type === `Restaurant`) {
@@ -78,27 +78,19 @@ const getEventTemplate = (event) => {
   );
 };
 
-class Event {
+class Event extends AbstractComponent {
   constructor(event) {
-    this._event = event;
+    super();
 
-    this._element = null;
+    this._event = event;
   }
 
   getTemplate() {
     return getEventTemplate(this._event);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setEditButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, handler);
   }
 }
 

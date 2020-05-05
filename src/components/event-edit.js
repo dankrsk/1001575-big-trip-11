@@ -1,8 +1,8 @@
 import {TYPES} from '../сonst.js';
 import {getEventWithAction} from './event.js';
 import {CITIES} from '../mock/mock_event.js';
-import {getDualFormat} from '../utils.js';
-import {createElement} from '../utils.js';
+import {getDualFormat} from '../utils/common.js';
+import AbstractComponent from '../components/abstract-component.js';
 
 const getEventItemsTemplate = (type, group) => {
   return TYPES[group].map((it) => {
@@ -161,27 +161,19 @@ const getEventEditTemplate = (event) => {
   );
 };
 
-class EventEdit {
+class EventEdit extends AbstractComponent {
   constructor(event) {
-    this._event = event;
+    super();
 
-    this._element = null;
+    this._event = event;
   }
 
   getTemplate() {
     return getEventEditTemplate(this._event);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  seEditFormtSubmitHandler(handler) {
+    this.getElement().querySelector(`.event--edit`).addEventListener(`submit`, handler);
   }
 }
 
