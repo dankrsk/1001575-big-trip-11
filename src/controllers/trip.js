@@ -1,30 +1,35 @@
-import {render, replace, RenderPosition} from '../utils/render.js';
+import {render, RenderPosition} from '../utils/render.js';
 import DayEventsComponent from '../components/day-events.js';
-import EventComponent from '../components/event.js';
-import EventEditComponent from '../components/event-edit.js';
+import EventController from '../controllers/event.js';
 
 class TripController {
   constructor(container) {
     this._container = container;
+
+    this._events = [];
+    this._eventControllers = [];
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onViewChange = this._onViewChange.bind(this);
   }
 
-  _renderEvent(dayEventsList, event) {
-    const eventComponent = new EventComponent(event);
-    const eventEditComponent = new EventEditComponent(event);
+  _onViewChange() {
+    this._eventControllers.forEach((it) => {
+      it.setDefaultView();
+    });
+  }
 
-    const onRollupButtonClick = () => {
-      replace(eventEditComponent, eventComponent);
-    };
+  _onDataChange(oldData, newData) {
+    const index = this._events.findIndex((it) => {
+      return it === oldData;
+    });
 
-    const onEditFormSubmit = (evt) => {
-      evt.preventDefault();
-      replace(eventComponent, eventEditComponent);
-    };
+    if (index === -1) {
+      return;
+    }
 
-    eventComponent.setEditButtonClickHandler(onRollupButtonClick);
-    eventEditComponent.seEditFormtSubmitHandler(onEditFormSubmit);
+    this._events = [].concat(this._events.slice(0, index), newData, this._events.slice(index + 1));
 
-    render(dayEventsList, eventComponent, RenderPosition.BEFOREEND);
+    this._eventControllers[index].rerender(this._events[index]);
   }
 
   render(events) {
@@ -35,7 +40,10 @@ class TripController {
       const dayEventsList = dayEventsComponent.getElement().querySelector(`.trip-events__list`);
 
       it.forEach((dayEvent) => {
-        this._renderEvent(dayEventsList, dayEvent);
+        const eventController = new EventController(dayEventsList, this._onDataChange, this._onViewChange);
+        eventController.render(dayEvent);
+        this._eventControllers.push(eventController);
+        this._events.push(dayEvent);
       });
     });
   }

@@ -127,7 +127,7 @@ const generateEvent = () => {
     },
     price: Math.floor(Math.random() * 500),
     time: getEventTime(),
-    isFavorite: Math.floor(Math.random() * 2),
+    isFavorite: Math.floor(Math.random() * 2) ? true : false,
   };
 };
 
@@ -150,4 +150,4 @@ const generateEvents = (count) => {
   return orderedEvents;
 };
 
-export {CITIES, generateEvents};
+export {CITIES, generateEvents, getOffers, getDescription};

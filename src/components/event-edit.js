@@ -2,7 +2,8 @@ import {TYPES} from '../сonst.js';
 import {getEventWithAction} from './event.js';
 import {CITIES} from '../mock/mock_event.js';
 import {getDualFormat} from '../utils/common.js';
-import AbstractComponent from '../components/abstract-component.js';
+import AbstractSmartComponent from '../components/abstract-smart-component.js';
+import {getOffers, getDescription} from '../mock/mock_event.js';
 
 const getEventItemsTemplate = (type, group) => {
   return TYPES[group].map((it) => {
@@ -88,8 +89,9 @@ const getEventDetailsTemplate = (offers, info) => {
   return template;
 };
 
-const getEventEditTemplate = (event) => {
-  const {type, city, time, price, offers, info} = event;
+const getEventEditTemplate = (event, options = {}) => {
+  const {city, time, price, info} = event;
+  const {type, offers} = options;
   const startTime = getFormatedTime(time.start);
   const endTime = getFormatedTime(time.end);
   const isFavorite = event.isFavorite ? ` checked` : ``;
@@ -161,19 +163,61 @@ const getEventEditTemplate = (event) => {
   );
 };
 
-class EventEdit extends AbstractComponent {
+class EventEdit extends AbstractSmartComponent {
   constructor(event) {
     super();
 
     this._event = event;
+    this._type = event.type;
+    this._offers = event.offers;
+    this._description = event.info.description;
+
+    this._editFormtSubmitHandler = null;
+    this._favoriteButtonClickHandler = null;
+
+    this._subscribeOnEvents();
+  }
+
+  recoveryListeners() {
+    this.setEditFormtSubmitHandler(this._editFormtSubmitHandler);
+    this.setFavoriteButtonClickHandler(this._favoriteButtonClickHandler);
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
-    return getEventEditTemplate(this._event);
+    return getEventEditTemplate(this._event, {
+      type: this._type,
+      offers: this._offers,
+    });
   }
 
-  seEditFormtSubmitHandler(handler) {
+  setEditFormtSubmitHandler(handler) {
     this.getElement().querySelector(`.event--edit`).addEventListener(`submit`, handler);
+
+    this._editFormtSubmitHandler = handler;
+  }
+
+  setFavoriteButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, handler);
+
+    this._favoriteButtonClickHandler = handler;
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+
+    element.querySelectorAll(`.event__type-group`).forEach((it) => {
+      it.addEventListener(`change`, (evt) => {
+        this._type = evt.target.value[0].toUpperCase() + evt.target.value.substring(1);
+        this._offers = getOffers(Math.floor(Math.random() * 5));
+
+        this.rerender();
+      });
+    });
+
+    element.querySelector(`.event__input--destination`).addEventListener(`change`, () => {
+      this._description = getDescription(Math.ceil(Math.random() * 4));
+    });
   }
 }
 
