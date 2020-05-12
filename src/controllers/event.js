@@ -1,10 +1,24 @@
 import EventComponent from '../components/event.js';
 import EventEditComponent from '../components/event-edit.js';
-import {render, replace, RenderPosition} from '../utils/render.js';
+import {render, replace, remove, RenderPosition} from '../utils/render.js';
 
 const Mode = {
+  ADDING: `adding`,
   DEFAULT: `default`,
   EDIT: `edit`,
+};
+
+const EmptyEvent = {
+  id: String(new Date() + Math.random()),
+  type: `Flight`,
+  city: ``,
+  price: ``,
+  time: {
+    date: new Date(),
+    start: new Date(),
+    end: new Date(),
+  },
+  isFavorite: false,
 };
 
 class EventController {
@@ -44,30 +58,44 @@ class EventController {
 
     this._eventEditComponent.setEditFormtSubmitHandler((evt) => {
       evt.preventDefault();
-      this.setDefaultView();
+      const data = this._eventEditComponent.getData();
+      this._onDataChange(event, data, this);
     });
     this._eventEditComponent.setFavoriteButtonClickHandler(() => {
       this._onDataChange(event, Object.assign({}, event, {
         isFavorite: !event.isFavorite,
       }));
     });
+    this._eventEditComponent.setDeleteButtonClickHandler(() => {
+      this._onDataChange(event, null, this);
+    });
   }
 
-  render(event) {
-    this._createNewComponents(event);
-    this._subscribeOnEvents(event);
-
-    render(this._container, this._eventComponent, RenderPosition.BEFOREEND);
+  destroy() {
+    remove(this._eventComponent);
+    remove(this._eventEditComponent);
   }
 
-  rerender(event) {
+  render(event, mode) {
     const oldEventEditComponent = this._eventEditComponent;
+    this._mode = mode;
 
     this._createNewComponents(event);
     this._subscribeOnEvents(event);
 
-    replace(this._eventEditComponent, oldEventEditComponent);
+    switch (mode) {
+      case Mode.DEFAULT:
+        if (oldEventEditComponent) {
+          replace(this._eventEditComponent, oldEventEditComponent);
+        } else {
+          render(this._container, this._eventComponent, RenderPosition.BEFOREEND);
+        }
+        break;
+      case Mode.ADDING:
+        render(this._container, this._eventEditComponent, RenderPosition.AFTERBEGIN);
+        break;
+    }
   }
 }
 
-export default EventController;
+export {EventController as default, Mode, EmptyEvent};

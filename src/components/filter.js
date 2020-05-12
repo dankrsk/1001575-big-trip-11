@@ -24,6 +24,12 @@ class Filter extends AbstractComponent {
   getTemplate() {
     return getFilterTemplate();
   }
+
+  setFilterChangeHandler(handler) {
+    this.getElement().parentElement.querySelector(`.trip-filters`).addEventListener(`change`, (evt) => {
+      handler(evt.target.value);
+    });
+  }
 }
 
 export default Filter;
