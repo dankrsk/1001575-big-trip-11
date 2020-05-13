@@ -35,7 +35,7 @@ const OFFER_NAMES = [
   `train`,
 ];
 const YEAR = 2020;
-const MONTH = 3;
+const MONTH = 4;
 
 const getHours = () => {
   return Math.floor(Math.random() * 24);
@@ -46,7 +46,7 @@ const getMinutes = () => {
 };
 
 const getDay = () => {
-  return Math.random() > 0.5 ? 1 : 2;
+  return Math.floor(Math.random() * 30);
 };
 
 const getDate = () => {
@@ -118,6 +118,7 @@ const getPhotos = (count) => {
 
 const generateEvent = () => {
   return {
+    id: String(new Date() + Math.random()),
     type: getType(),
     city: getCity(),
     offers: getOffers(Math.floor(Math.random() * 5)),

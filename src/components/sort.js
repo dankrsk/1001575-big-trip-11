@@ -3,7 +3,7 @@ import AbstractComponent from '../components/abstract-component.js';
 const getSortTemplate = () => {
   return (
     `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-			<span class="trip-sort__item  trip-sort__item--day"></span>
+			<span class="trip-sort__item  trip-sort__item--day">Day</span>
 			<div class="trip-sort__item  trip-sort__item--event">
 				<input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event">
 				<label class="trip-sort__btn" for="sort-event">Event</label>

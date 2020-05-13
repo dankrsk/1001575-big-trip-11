@@ -5,6 +5,22 @@ import {getDualFormat} from '../utils/common.js';
 import AbstractSmartComponent from '../components/abstract-smart-component.js';
 import {getOffers, getDescription} from '../mock/mock_event.js';
 
+const parseFormData = (formData) => {
+  const date = new Date(formData.get(`event-start-time`));
+  date.setHours(0, 0, 0, 0);
+
+  return {
+    type: formData.get(`event-type`),
+    city: formData.get(`event-destination`),
+    time: {
+      date,
+      start: new Date(formData.get(`event-start-time`)),
+      end: new Date(formData.get(`event-end-time`)),
+    },
+    price: formData.get(`event-price`),
+  };
+};
+
 const getEventItemsTemplate = (type, group) => {
   return TYPES[group].map((it) => {
     let checked = ``;
@@ -43,7 +59,7 @@ const getOfferTemplate = (offers) => {
 
 const getOffersTemplate = (offers) => {
   let template = ``;
-  if (offers.length) {
+  if (offers) {
     template = `<section class="event__section  event__section--offers">
                   <h3 class="event__section-title  event__section-title--offers">Offers</h3>
                   <div class="event__available-offers">
@@ -79,7 +95,7 @@ const getFormatedTime = (time) => {
 const getEventDetailsTemplate = (offers, info) => {
   let template = ``;
 
-  if (offers.length || info) {
+  if (offers || info) {
     return `<section class="event__details">
               ${getOffersTemplate(offers)}
               ${getDestinationTemplate(info)}
@@ -90,8 +106,8 @@ const getEventDetailsTemplate = (offers, info) => {
 };
 
 const getEventEditTemplate = (event, options = {}) => {
-  const {city, time, price, info} = event;
-  const {type, offers} = options;
+  const {city, time, price} = event;
+  const {type, offers, info} = options;
   const startTime = getFormatedTime(time.start);
   const endTime = getFormatedTime(time.end);
   const isFavorite = event.isFavorite ? ` checked` : ``;
@@ -170,10 +186,11 @@ class EventEdit extends AbstractSmartComponent {
     this._event = event;
     this._type = event.type;
     this._offers = event.offers;
-    this._description = event.info.description;
+    this._info = event.info;
 
     this._editFormtSubmitHandler = null;
     this._favoriteButtonClickHandler = null;
+    this._deleteButtonClickHandler = null;
 
     this._subscribeOnEvents();
   }
@@ -181,6 +198,7 @@ class EventEdit extends AbstractSmartComponent {
   recoveryListeners() {
     this.setEditFormtSubmitHandler(this._editFormtSubmitHandler);
     this.setFavoriteButtonClickHandler(this._favoriteButtonClickHandler);
+    this.setDeleteButtonClickHandler(this._deleteButtonClickHandler);
     this._subscribeOnEvents();
   }
 
@@ -188,7 +206,15 @@ class EventEdit extends AbstractSmartComponent {
     return getEventEditTemplate(this._event, {
       type: this._type,
       offers: this._offers,
+      info: this._info
     });
+  }
+
+  getData() {
+    const form = this.getElement().querySelector(`.event--edit`);
+    const formData = new FormData(form);
+
+    return parseFormData(formData);
   }
 
   setEditFormtSubmitHandler(handler) {
@@ -201,6 +227,12 @@ class EventEdit extends AbstractSmartComponent {
     this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, handler);
 
     this._favoriteButtonClickHandler = handler;
+  }
+
+  setDeleteButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, handler);
+
+    this._deleteButtonClickHandler = handler;
   }
 
   _subscribeOnEvents() {
@@ -216,7 +248,9 @@ class EventEdit extends AbstractSmartComponent {
     });
 
     element.querySelector(`.event__input--destination`).addEventListener(`change`, () => {
-      this._description = getDescription(Math.ceil(Math.random() * 4));
+      this._info.description = getDescription(Math.ceil(Math.random() * 4));
+
+      this.rerender();
     });
   }
 }

@@ -27,7 +27,7 @@ const getOffersTemplate = (offers) => {
   const OFFERS_NUMBER_TO_SHOW = 3;
   let template = ``;
 
-  if (offers.length !== 0) {
+  if (offers) {
     const items = offers.map((it) => {
       return `<li class="event__offer">
                 <span class="event__offer-title">${it.title}</span>
