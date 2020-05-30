@@ -359,8 +359,8 @@ class EventEdit extends AbstractSmartComponent {
   checkValidity() {
     const element = this.getElement();
     const destinationInput = element.querySelector(`.event__input--destination`);
-		const priceInput = element.querySelector(`.event__input--price`);
-		const dateInputs = element.querySelectorAll(`.flatpickr-input`);
+    const priceInput = element.querySelector(`.event__input--price`);
+    const dateInputs = element.querySelectorAll(`.flatpickr-input`);
 
     destinationInput.checkValidity();
     dateInputs.forEach((it) => {

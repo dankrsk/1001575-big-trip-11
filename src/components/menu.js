@@ -3,7 +3,7 @@ import AbstractComponent from '../components/abstract-component.js';
 const States = {
   TABLE: `Table`,
   STATS: `Stats`,
-}
+};
 
 const getMenuTemplate = () => {
   return (
