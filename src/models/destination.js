@@ -1,0 +1,19 @@
+class Destination {
+  constructor(data) {
+    this.description = data[`description`];
+    this.name = data[`name`];
+    this.pictures = data[`pictures`];
+  }
+
+  static parseDestination(data) {
+    return new Destination(data);
+  }
+
+  static parseDestinations(data) {
+    return data.map((it) => {
+      return Destination.parseDestination(it);
+    });
+  }
+}
+
+export default Destination;

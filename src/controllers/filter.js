@@ -1,6 +1,6 @@
 import {FilterType} from '../сonst.js';
 import FilterComponent from '../components/filter.js';
-import {render, RenderPosition} from '../utils/render.js';
+import {render, RenderPosition, remove} from '../utils/render.js';
 
 class Filter {
   constructor(container, eventsModel) {
@@ -10,19 +10,22 @@ class Filter {
     this._activeFilterType = FilterType.EVERYTHING;
     this._filterComponent = null;
 
-    this._onFilterChange = this._onFilterChange.bind(this);
+    this.onFilterChange = this.onFilterChange.bind(this);
   }
 
   render() {
-    this._filterComponent = new FilterComponent();
-    this._filterComponent.setFilterChangeHandler(this._onFilterChange);
+    this._filterComponent = new FilterComponent(this._activeFilterType);
+    this._filterComponent.setFilterChangeHandler(this.onFilterChange);
 
     render(this._container, this._filterComponent, RenderPosition.BEFOREEND);
   }
 
-  _onFilterChange(filterType) {
+  onFilterChange(filterType) {
     this._eventsModel.setFilter(filterType);
     this._activeFilterType = filterType;
+
+    remove(this._filterComponent);
+    this.render();
   }
 }
 
