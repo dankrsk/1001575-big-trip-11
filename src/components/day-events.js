@@ -2,15 +2,10 @@ import {MONTH_NAMES} from '../сonst.js';
 import AbstractComponent from '../components/abstract-component.js';
 
 const getDayEventsTemplate = (date, numberOfDay) => {
-  const year = date.getFullYear();
-  const month = MONTH_NAMES[date.getMonth()];
-  const day = date.getDate();
-
   return (
     `<li class="trip-days__item  day">
       <div class="day__info">
-        <span class="day__counter">${numberOfDay}</span>
-        <time class="day__date" datetime="${year}-${month}-${day}">${month} ${day}</time>
+      ${(date && numberOfDay) ? `<span class="day__counter">${numberOfDay}</span><time class="day__date" datetime="${date.getFullYear()}-${MONTH_NAMES[date.getMonth()]}-${date.getDate()}">${MONTH_NAMES[date.getMonth()]} ${date.getDate()}</time>` : ``}
       </div>
       <ul class="trip-events__list">
       </ul>
@@ -19,7 +14,7 @@ const getDayEventsTemplate = (date, numberOfDay) => {
 };
 
 class DayEvents extends AbstractComponent {
-  constructor(date, numberOfDay) {
+  constructor(date = null, numberOfDay = null) {
     super();
 
     this._date = date;

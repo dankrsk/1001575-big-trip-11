@@ -1,6 +1,9 @@
 import EventComponent from '../components/event.js';
 import EventEditComponent from '../components/event-edit.js';
+import EventModel from '../models/event.js';
 import {render, replace, remove, RenderPosition} from '../utils/render.js';
+
+const DEFAULT_TYPE = `flight`;
 
 const Mode = {
   ADDING: `adding`,
@@ -9,20 +12,20 @@ const Mode = {
 };
 
 const EmptyEvent = {
-  id: String(new Date() + Math.random()),
-  type: `Flight`,
-  city: ``,
-  price: ``,
+  price: null,
   time: {
-    date: new Date(),
     start: new Date(),
     end: new Date(),
   },
-  isFavorite: false,
+  destination: null,
+  id: null,
+  isFavorite: null,
+  offers: null,
+  type: DEFAULT_TYPE,
 };
 
 class EventController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, destinationsModel, offersModel) {
     this._container = container;
     this._onDataChange = onDataChange;
     this._onViewChange = onViewChange;
@@ -30,12 +33,17 @@ class EventController {
     this._eventComponent = null;
     this._eventEditComponent = null;
 
+    this._destinationsModel = destinationsModel;
+    this._offersModel = offersModel;
+
     this._mode = Mode.DEFAULT;
   }
 
   _createNewComponents(event) {
-    this._eventComponent = new EventComponent(event);
-    this._eventEditComponent = new EventEditComponent(event);
+    if (this._mode !== Mode.ADDING) {
+      this._eventComponent = new EventComponent(event);
+    }
+    this._eventEditComponent = new EventEditComponent(event, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
 
   _replaceEventToEdit() {
@@ -44,31 +52,45 @@ class EventController {
   }
 
   setDefaultView() {
-    if (this._mode !== Mode.DEFAULT) {
+    if (this._mode === Mode.EDIT) {
+      this._eventEditComponent.cancelUnsavedChanges();
       replace(this._eventComponent, this._eventEditComponent);
       this._mode = Mode.DEFAULT;
     }
   }
 
   _subscribeOnEvents(event) {
-    this._eventComponent.setEditButtonClickHandler(() => {
-      this._onViewChange();
-      this._replaceEventToEdit();
+    this._eventEditComponent.setEditFormSubmitHandler((evt) => {
+      evt.preventDefault();
+      if (!this._eventEditComponent.checkValidity()) {
+        const data = this._eventEditComponent.getData();
+        const newEvent = EventModel.clone(event);
+        newEvent.price = data.price;
+        newEvent.time = data.time;
+        newEvent.destination = data.destination;
+        newEvent.offers = data.offers;
+        newEvent.type = data.type;
+
+        this._onDataChange(event, newEvent);
+      }
     });
 
-    this._eventEditComponent.setEditFormtSubmitHandler((evt) => {
-      evt.preventDefault();
-      const data = this._eventEditComponent.getData();
-      this._onDataChange(event, data, this);
-    });
-    this._eventEditComponent.setFavoriteButtonClickHandler(() => {
-      this._onDataChange(event, Object.assign({}, event, {
-        isFavorite: !event.isFavorite,
-      }));
-    });
     this._eventEditComponent.setDeleteButtonClickHandler(() => {
-      this._onDataChange(event, null, this);
+      this._onDataChange(event, null);
     });
+
+    if (this._mode !== Mode.ADDING) {
+      this._eventComponent.setEditButtonClickHandler(() => {
+        this._onViewChange();
+        this._replaceEventToEdit();
+      });
+
+      this._eventEditComponent.setFavoriteButtonClickHandler(() => {
+        const newEvent = EventModel.clone(event);
+        newEvent.isFavorite = !newEvent.isFavorite;
+        this._onDataChange(event, newEvent, this);
+      });
+    }
   }
 
   destroy() {
@@ -85,14 +107,13 @@ class EventController {
 
     switch (mode) {
       case Mode.DEFAULT:
-        if (oldEventEditComponent) {
-          replace(this._eventEditComponent, oldEventEditComponent);
-        } else {
-          render(this._container, this._eventComponent, RenderPosition.BEFOREEND);
-        }
+        render(this._container, this._eventComponent, RenderPosition.BEFOREEND);
+        break;
+      case Mode.EDIT:
+        replace(this._eventEditComponent, oldEventEditComponent);
         break;
       case Mode.ADDING:
-        render(this._container, this._eventEditComponent, RenderPosition.AFTERBEGIN);
+        render(this._container.querySelector(`.trip-days`), this._eventEditComponent, RenderPosition.BEFOREBEGIN);
         break;
     }
   }

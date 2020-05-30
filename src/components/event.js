@@ -1,12 +1,12 @@
-import {getDualFormat} from '../utils/common.js';
+import {getDualFormat, getStringWithFirstCapitalLetter} from '../utils/common.js';
 import {ONE_DAY_IN_MS, ONE_HOUR_IN_MS, ONE_MINUTE_IN_MS} from '../сonst.js';
 import AbstractComponent from '../components/abstract-component.js';
 
 const getEventWithAction = (type) => {
-  if (type === `Check-in` || type === `Sightseeing` || type === `Restaurant`) {
-    return `${type} in`;
+  if (type === `check-in` || type === `sightseeing` || type === `restaurant`) {
+    return `${getStringWithFirstCapitalLetter(type)} in`;
   } else {
-    return `${type} to`;
+    return `${getStringWithFirstCapitalLetter(type)} to`;
   }
 };
 
@@ -31,7 +31,7 @@ const getOffersTemplate = (offers) => {
     const items = offers.map((it) => {
       return `<li class="event__offer">
                 <span class="event__offer-title">${it.title}</span>
-                &plus;&euro;&nbsp;<span class="event__offer-price">${it.price}</span>
+                &plus; &euro;&nbsp;<span class="event__offer-price">${it.price}</span>
               </li>`;
     }).slice(0, OFFERS_NUMBER_TO_SHOW).join(`\n`);
     template = `<h4 class="visually-hidden">Offers:</h4>
@@ -44,9 +44,9 @@ const getOffersTemplate = (offers) => {
 };
 
 const getEventTemplate = (event) => {
-  const {type, city, price, offers, time} = event;
+  const {type, destination, price, offers, time} = event;
 
-  const dateTime = `${time.date.getFullYear()}-${time.date.getMonth()}-${time.date.getDate()}`;
+  const dateTime = `${time.start.getFullYear()}-${time.start.getMonth()}-${time.start.getDate()}`;
   const startTime = `${getDualFormat(time.start.getHours())}:${getDualFormat(time.start.getMinutes())}`;
   const endTime = `${getDualFormat(time.end.getHours())}:${getDualFormat(time.end.getMinutes())}`;
   const duration = getEventDuration(time.start, time.end);
@@ -57,7 +57,7 @@ const getEventTemplate = (event) => {
 				<div class="event__type">
 					<img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
 				</div>
-				<h3 class="event__title">${getEventWithAction(type)} ${city}</h3>
+				<h3 class="event__title">${getEventWithAction(type)} ${destination ? destination.name : ``}</h3>
 				<div class="event__schedule">
 					<p class="event__time">
 						<time class="event__start-time" datetime="${dateTime}T${startTime}">${startTime}</time>
@@ -67,7 +67,7 @@ const getEventTemplate = (event) => {
 					<p class="event__duration">${duration}</p>
 				</div>
 				<p class="event__price">
-					&euro;&nbsp;<span class="event__price-value">${price}</span>
+					&euro;&nbsp;<span class="event__price-value">${price ? price : ``}</span>
         </p>
         ${getOffersTemplate(offers)}
 				<button class="event__rollup-btn" type="button">
