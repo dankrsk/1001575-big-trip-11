@@ -1,14 +1,14 @@
 import {FilterType} from '../сonst.js';
 
 const getFutureEvents = (events, nowDate) => {
-  return events.filter((it) => {
-    return it.time.start.getTime() > nowDate.getTime();
+  return events.filter((event) => {
+    return event.time.start.getTime() > nowDate.getTime();
   });
 };
 
 const getPastEvents = (events, nowDate) => {
-  return events.filter((it) => {
-    return it.time.start.getTime() < nowDate.getTime();
+  return events.filter((event) => {
+    return event.time.start.getTime() < nowDate.getTime();
   });
 };
 

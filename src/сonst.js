@@ -42,10 +42,10 @@ const SortType = {
   PRICE: `sort-price`,
 };
 
-const classToHideElement = `visually-hidden`;
+const CLASS_TO_HIDE_ELEMENT = `visually-hidden`;
 
 const ONE_DAY_IN_MS = 86400000;
 const ONE_HOUR_IN_MS = 3600000;
 const ONE_MINUTE_IN_MS = 60000;
 
-export {TYPES, MONTH_NAMES, ONE_DAY_IN_MS, ONE_HOUR_IN_MS, ONE_MINUTE_IN_MS, FilterType, SortType, classToHideElement};
+export {TYPES, MONTH_NAMES, ONE_DAY_IN_MS, ONE_HOUR_IN_MS, ONE_MINUTE_IN_MS, FilterType, SortType, CLASS_TO_HIDE_ELEMENT};

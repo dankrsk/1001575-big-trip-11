@@ -27,8 +27,8 @@ class API {
   }
 
   _callBadStatusHandlers() {
-    this._badStatusHandlers.forEach((it) => {
-      it();
+    this._badStatusHandlers.forEach((handler) => {
+      handler();
     });
   }
 
@@ -43,7 +43,7 @@ class API {
     return fetch(Url.EVENTS, {headers})
       .then((response) => this._checkStatus(response, this._callBadStatusHandlers.bind(this)))
       .then((response) => response.json())
-      .then((data) => Event.parseEvents(data));
+      .then((events) => Event.parseEvents(events));
   }
 
   getDestinations() {
@@ -53,7 +53,7 @@ class API {
     return fetch(Url.DESTINATIONS, {headers})
       .then((response) => this._checkStatus(response))
       .then((response) => response.json())
-      .then((data) => Destination.parseDestinations(data));
+      .then((destinations) => Destination.parseDestinations(destinations));
   }
 
   getOffers() {
@@ -63,22 +63,22 @@ class API {
     return fetch(Url.OFFERS, {headers})
       .then((response) => this._checkStatus(response))
       .then((response) => response.json())
-      .then((data) => Offer.parseOffers(data));
+      .then((offers) => Offer.parseOffers(offers));
   }
 
-  updateEvent(id, data) {
+  updateEvent(id, newEvent) {
     const headers = new Headers();
     headers.append(`Authorization`, this._authorization);
     headers.append(`Content-Type`, `application/json`);
 
     return fetch(Url.EVENTS + `/${id}`, {
       method: `PUT`,
-      body: JSON.stringify(data.toRAW()),
+      body: JSON.stringify(newEvent.toRAW()),
       headers,
     })
     .then((response) => this._checkStatus(response))
     .then((response) => response.json())
-    .then((responseData) => Event.parseEvent(responseData));
+    .then((event) => Event.parseEvent(event));
   }
 
   deleteEvent(id) {
@@ -92,19 +92,19 @@ class API {
     .then((response) => this._checkStatus(response));
   }
 
-  createEvent(event) {
+  createEvent(newEvent) {
     const headers = new Headers();
     headers.append(`Authorization`, this._authorization);
     headers.append(`Content-Type`, `application/json`);
 
     return fetch(Url.EVENTS, {
       method: `POST`,
-      body: JSON.stringify(event.toRAW()),
+      body: JSON.stringify(newEvent.toRAW()),
       headers,
     })
     .then((response) => this._checkStatus(response))
     .then((response) => response.json())
-    .then((responseData) => Event.parseEvent(responseData));
+    .then((event) => Event.parseEvent(event));
   }
 }
 

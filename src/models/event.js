@@ -1,31 +1,31 @@
 const DEFAULT_TYPE = `flight`;
 
 class Event {
-  constructor(data = null) {
-    this.price = data ? data[`base_price`] : null;
+  constructor(event = null) {
+    this.price = event ? event[`base_price`] : null;
     this.time = {
-      start: data ? new Date(data[`date_from`]) : new Date(),
-      end: data ? new Date(data[`date_to`]) : new Date(),
+      start: event ? new Date(event[`date_from`]) : new Date(),
+      end: event ? new Date(event[`date_to`]) : new Date(),
     };
-    this.destination = data ? data[`destination`] : null;
-    this.id = data ? data[`id`] : null;
-    this.isFavorite = data ? Boolean(data[`is_favorite`]) : false;
-    this.offers = data ? data[`offers`] : null;
-    this.type = data ? data[`type`] : DEFAULT_TYPE;
+    this.destination = event ? event[`destination`] : null;
+    this.id = event ? event[`id`] : null;
+    this.isFavorite = event ? Boolean(event[`is_favorite`]) : false;
+    this.offers = event ? event[`offers`] : null;
+    this.type = event ? event[`type`] : DEFAULT_TYPE;
   }
 
-  static parseEvent(data) {
-    return new Event(data);
+  static parseEvent(event) {
+    return new Event(event);
   }
 
-  static parseEvents(data) {
-    return data.map((it) => {
-      return Event.parseEvent(it);
+  static parseEvents(events) {
+    return events.map((event) => {
+      return Event.parseEvent(event);
     });
   }
 
-  static clone(data) {
-    return new Event(data.toRAW());
+  static clone(event) {
+    return new Event(event.toRAW());
   }
 
   toRAW() {

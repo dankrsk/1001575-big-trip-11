@@ -28,10 +28,10 @@ const getOffersTemplate = (offers) => {
   let template = ``;
 
   if (offers) {
-    const items = offers.map((it) => {
+    const items = offers.map((offer) => {
       return `<li class="event__offer">
-                <span class="event__offer-title">${it.title}</span>
-                &plus; &euro;&nbsp;<span class="event__offer-price">${it.price}</span>
+                <span class="event__offer-title">${offer.title}</span>
+                &plus; &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
               </li>`;
     }).slice(0, OFFERS_NUMBER_TO_SHOW).join(`\n`);
     template = `<h4 class="visually-hidden">Offers:</h4>

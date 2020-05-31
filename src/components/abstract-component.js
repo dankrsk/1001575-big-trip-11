@@ -1,5 +1,5 @@
 import {createElement} from '../utils/render.js';
-import {classToHideElement} from '../сonst.js';
+import {CLASS_TO_HIDE_ELEMENT} from '../сonst.js';
 
 class AbstractComponent {
   constructor() {
@@ -27,11 +27,11 @@ class AbstractComponent {
   }
 
   show() {
-    this.getElement().classList.remove(classToHideElement);
+    this.getElement().classList.remove(CLASS_TO_HIDE_ELEMENT);
   }
 
   hide() {
-    this.getElement().classList.add(classToHideElement);
+    this.getElement().classList.add(CLASS_TO_HIDE_ELEMENT);
   }
 }
 

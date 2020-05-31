@@ -6,7 +6,7 @@ import EventsListComponent from '../components/events-list.js';
 import LoadingMessageComponent from '../components/loading-message.js';
 import NoPointsMessageComponent from '../components/no-points-message.js';
 import {SortType, FilterType} from '../сonst.js';
-import {classToHideElement} from '../сonst.js';
+import {CLASS_TO_HIDE_ELEMENT} from '../сonst.js';
 
 class TripController {
   constructor(container, eventsModel, destinationsModel, offersModel, filterController, api) {
@@ -54,15 +54,15 @@ class TripController {
 
   _removeEvents() {
     this._removeCreatingEvent();
-    this._eventControllers.forEach((it) => {
-      it.destroy();
+    this._eventControllers.forEach((eventController) => {
+      eventController.destroy();
     });
     this._eventControllers = [];
   }
 
   _removeDayEventsComponents() {
-    this._dayEventsComponents.forEach((it) => {
-      remove(it);
+    this._dayEventsComponents.forEach((dayEventsComponent) => {
+      remove(dayEventsComponent);
     });
     this._dayEventsComponents = [];
   }
@@ -143,16 +143,16 @@ class TripController {
       let day = 0;
       let dayEventsList = null;
 
-      events.forEach((it) => {
-        if (it.day !== day) {
-          const dayEventsComponent = new DayEventsComponent(it.time.start, it.day);
+      events.forEach((event) => {
+        if (event.day !== day) {
+          const dayEventsComponent = new DayEventsComponent(event.time.start, event.day);
           this._dayEventsComponents.push(dayEventsComponent);
           render(eventContainer, dayEventsComponent, RenderPosition.BEFOREEND);
           dayEventsList = dayEventsComponent.getElement().querySelector(`.trip-events__list`);
-          day = it.day;
+          day = event.day;
         }
         const eventController = new EventController(dayEventsList, this._onDataChange, this._onViewChange, this._destinationsModel, this._offersModel);
-        eventController.render(it, EventControllerMode.DEFAULT);
+        eventController.render(event, EventControllerMode.DEFAULT);
         this._eventControllers.push(eventController);
       });
     } else {
@@ -160,26 +160,26 @@ class TripController {
       this._dayEventsComponents.push(dayEventsComponent);
       render(eventContainer, dayEventsComponent, RenderPosition.BEFOREEND);
       const dayEventsList = dayEventsComponent.getElement().querySelector(`.trip-events__list`);
-      events.forEach((it) => {
+      events.forEach((event) => {
         const eventController = new EventController(dayEventsList, this._onDataChange, this._onViewChange, this._destinationsModel, this._offersModel);
-        eventController.render(it, EventControllerMode.DEFAULT);
+        eventController.render(event, EventControllerMode.DEFAULT);
         this._eventControllers.push(eventController);
       });
     }
   }
 
   show() {
-    this._container.classList.remove(classToHideElement);
+    this._container.classList.remove(CLASS_TO_HIDE_ELEMENT);
   }
 
   hide() {
-    this._container.classList.add(classToHideElement);
+    this._container.classList.add(CLASS_TO_HIDE_ELEMENT);
   }
 
   _onViewChange() {
     this._removeCreatingEvent();
-    this._eventControllers.forEach((it) => {
-      it.setDefaultView();
+    this._eventControllers.forEach((eventController) => {
+      eventController.setDefaultView();
     });
   }
 

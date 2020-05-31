@@ -25,6 +25,8 @@ class EventController {
     this._destinationsModel = destinationsModel;
     this._offersModel = offersModel;
 
+    this._onEscKeyDown = this._onEscKeyDown.bind(this);
+
     this._mode = Mode.DEFAULT;
   }
 
@@ -45,6 +47,18 @@ class EventController {
       this._eventEditComponent.cancelUnsavedChanges();
       replace(this._eventComponent, this._eventEditComponent);
       this._mode = Mode.DEFAULT;
+      document.removeEventListener(`keydown`, this._onEscKeyDown);
+    }
+  }
+
+  _onEscKeyDown(evt) {
+    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+
+    if (isEscKey) {
+      if (this._mode === Mode.ADDING) {
+        this._onDataChange(EmptyEvent, null, this);
+      }
+      this.setDefaultView();
     }
   }
 
@@ -57,13 +71,13 @@ class EventController {
           saveButtonText: `Saving...`,
         });
 
-        const data = this._eventEditComponent.getData();
+        const eventsData = this._eventEditComponent.getData();
         const newEvent = EventModel.clone(event);
-        newEvent.price = data.price;
-        newEvent.time = data.time;
-        newEvent.destination = data.destination;
-        newEvent.offers = data.offers;
-        newEvent.type = data.type;
+        newEvent.price = eventsData.price;
+        newEvent.time = eventsData.time;
+        newEvent.destination = eventsData.destination;
+        newEvent.offers = eventsData.offers;
+        newEvent.type = eventsData.type;
 
         this._eventEditComponent.disableForm();
         this._onDataChange(event, newEvent, this);
@@ -82,6 +96,7 @@ class EventController {
       this._eventComponent.setEditButtonClickHandler(() => {
         this._onViewChange();
         this._replaceEventToEdit();
+        document.addEventListener(`keydown`, this._onEscKeyDown);
       });
 
       this._eventEditComponent.setFavoriteButtonClickHandler(() => {
@@ -89,6 +104,8 @@ class EventController {
         newEvent.isFavorite = !newEvent.isFavorite;
         this._onDataChange(event, newEvent, this, Mode.EDIT);
       });
+    } else {
+      document.addEventListener(`keydown`, this._onEscKeyDown);
     }
   }
 
@@ -114,6 +131,7 @@ class EventController {
   destroy() {
     remove(this._eventComponent);
     remove(this._eventEditComponent);
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
   render(event, mode) {

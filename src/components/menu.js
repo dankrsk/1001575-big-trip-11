@@ -19,11 +19,11 @@ class Menu extends AbstractComponent {
     super();
 
     this._activeState = States.TABLE;
-    this._tableLink = Array.from(this.getElement().querySelectorAll(`a`)).find((it) => {
-      return it.innerHTML === States.TABLE;
+    this._tableLink = Array.from(this.getElement().querySelectorAll(`a`)).find((link) => {
+      return link.innerHTML === States.TABLE;
     });
-    this._statsLink = Array.from(this.getElement().querySelectorAll(`a`)).find((it) => {
-      return it.innerHTML === States.STATS;
+    this._statsLink = Array.from(this.getElement().querySelectorAll(`a`)).find((link) => {
+      return link.innerHTML === States.STATS;
     });
   }
 

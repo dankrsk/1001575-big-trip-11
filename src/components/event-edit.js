@@ -1,52 +1,51 @@
 import {TYPES} from '../сonst.js';
 import {getEventWithAction} from './event.js';
-import {getDualFormat, getIsoTimeFormat, getStringWithFirstCapitalLetter} from '../utils/common.js';
+import {getDualFormat, getStringWithFirstCapitalLetter} from '../utils/common.js';
 import AbstractSmartComponent from '../components/abstract-smart-component.js';
 import TimeValidationMessageComponent from '../components/time-validation-message.js';
 import flatpickr from 'flatpickr';
-
 import 'flatpickr/dist/flatpickr.min.css';
-import { render, remove } from '../utils/render.js';
+import {render, remove} from '../utils/render.js';
 
 const DefaultData = {
   deleteButtonText: `Delete`,
   saveButtonText: `Save`,
 };
 
-const getEventItemsTemplate = (type, group) => {
-  return TYPES[group].map((it) => {
+const getEventItemsTemplate = (checkedType, group) => {
+  return TYPES[group].map((type) => {
     let checked = ``;
-    if (type === it.toLowerCase()) {
+    if (checkedType === type.toLowerCase()) {
       checked = ` checked`;
     }
     return `<div class="event__type-item">
-              <input id="event-type-${it.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${it.toLowerCase()}"${checked}>
-              <label class="event__type-label  event__type-label--${it.toLowerCase()}" for="event-type-${it.toLowerCase()}-1">${it}</label>
+              <input id="event-type-${type.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type.toLowerCase()}"${checked}>
+              <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-1">${type}</label>
             </div>`;
   }).join(`\n`);
 };
 
 const getDestinationItemsTemplate = (allDestinations) => {
-  return allDestinations.map((it) => {
-    return `<option value="${it.name}"></option>`;
+  return allDestinations.map((destination) => {
+    return `<option value="${destination.name}"></option>`;
   }).join(`\n`);
 };
 
 const getOffersTemplate = (offers, typesOffers) => {
-  const template = typesOffers.map((it) => {
+  const template = typesOffers.map((typesOffer) => {
     let isChecked = ``;
     if (offers) {
       isChecked = offers.some((offer) => {
-        return offer.title === it.title;
+        return offer.title === typesOffer.title;
       }) ? ` checked` : ``;
     }
-    const name = it.title.split(` `).join(`-`).toLowerCase();
+    const name = typesOffer.title.split(` `).join(`-`).toLowerCase();
     return `<div class="event__offer-selector">
               <input class="event__offer-checkbox  visually-hidden" id="event-offer-${name}-1" type="checkbox" name="event-offer-${name}"${isChecked}>
               <label class="event__offer-label" for="event-offer-${name}-1">
-                <span class="event__offer-title">${it.title}</span>
+                <span class="event__offer-title">${typesOffer.title}</span>
                 &plus;
-                &euro;&nbsp;<span class="event__offer-price">${it.price}</span>
+                &euro;&nbsp;<span class="event__offer-price">${typesOffer.price}</span>
               </label>
             </div>`;
   }).join(`\n`);
@@ -64,8 +63,8 @@ const getDestinationTemplate = (destination) => {
   if (destination.pictures.length !== 0) {
     pictures = `<div class="event__photos-container">
                   <div class="event__photos-tape">
-                    ${destination.pictures.map((it) => {
-    return `<img class="event__photo" src="${it.src}" alt="${it.description}">`;
+                    ${destination.pictures.map((picture) => {
+    return `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`;
   }).join(`\n`)}
                   </div>
                 </div>`;
@@ -267,8 +266,8 @@ class EventEdit extends AbstractSmartComponent {
     }
 
     const offersForCurrentType = this._getOffers(type);
-    const offers = offersForCurrentType.filter((it) => {
-      return checkedOffersTitles.includes(it.title);
+    const offers = offersForCurrentType.filter((offer) => {
+      return checkedOffersTitles.includes(offer.title);
     });
 
     return {
@@ -284,15 +283,15 @@ class EventEdit extends AbstractSmartComponent {
   }
 
   _getOffers(type) {
-    const index = this._allOffers.findIndex((it) => {
-      return it.type === type;
+    const index = this._allOffers.findIndex((offer) => {
+      return offer.type === type;
     });
     return this._allOffers[index].offers;
   }
 
   _getDestination(name) {
-    const index = this._allDestinations.findIndex((it) => {
-      return it.name === name;
+    const index = this._allDestinations.findIndex((destination) => {
+      return destination.name === name;
     });
     if (index === -1) {
       return false;
@@ -303,8 +302,8 @@ class EventEdit extends AbstractSmartComponent {
 
   _applyFlatpickr() {
     if (this._flatpickres) {
-      this._flatpickres.forEach((it) => {
-        it.destroy();
+      this._flatpickres.forEach((flatpickrInstance) => {
+        flatpickrInstance.destroy();
       });
       this._flatpickres = [];
     }
@@ -327,8 +326,8 @@ class EventEdit extends AbstractSmartComponent {
   }
 
   disableForm() {
-    this.getElement().querySelectorAll(`input, button`).forEach((it) => {
-      it.setAttribute(`disabled`, `disabled`);
+    this.getElement().querySelectorAll(`input, button`).forEach((formElement) => {
+      formElement.setAttribute(`disabled`, `disabled`);
     });
     if (this._favoriteButtonClickHandler) {
       this.removeFavoriteButtonClickHandler();
@@ -336,16 +335,16 @@ class EventEdit extends AbstractSmartComponent {
   }
 
   enableForm() {
-    this.getElement().querySelectorAll(`input, button`).forEach((it) => {
-      it.removeAttribute(`disabled`);
+    this.getElement().querySelectorAll(`input, button`).forEach((formElement) => {
+      formElement.removeAttribute(`disabled`);
     });
     if (this._favoriteButtonClickHandler) {
       this.setFavoriteButtonClickHandler(this._favoriteButtonClickHandler);
     }
   }
 
-  setData(data) {
-    this._externalData = Object.assign({}, DefaultData, data);
+  setData(buttonText) {
+    this._externalData = Object.assign({}, DefaultData, buttonText);
     this.rerender();
   }
 
@@ -422,8 +421,8 @@ class EventEdit extends AbstractSmartComponent {
     priceInput.checkValidity();
     if (this._timeValid) {
       render(this.getElement().querySelector(`.event__field-group--time`), this._timeValid);
-      dateInputs.forEach((it) => {
-        it.style.outline = `2px solid red`;
+      dateInputs.forEach((input) => {
+        input.style.outline = `2px solid red`;
       });
       return true;
     }
@@ -439,8 +438,8 @@ class EventEdit extends AbstractSmartComponent {
     if (timeStart.getTime() <= timeEnd.getTime()) {
       remove(this._timeValid);
       this._timeValid = null;
-      dateInputs.forEach((it) => {
-        it.style.outline = ``;
+      dateInputs.forEach((input) => {
+        input.style.outline = ``;
       });
     } else {
       this._timeValid = new TimeValidationMessageComponent();
@@ -450,8 +449,8 @@ class EventEdit extends AbstractSmartComponent {
   _subscribeOnEvents() {
     const element = this.getElement();
 
-    element.querySelectorAll(`.event__type-group`).forEach((it) => {
-      it.addEventListener(`change`, (evt) => {
+    element.querySelectorAll(`.event__type-group`).forEach((input) => {
+      input.addEventListener(`change`, (evt) => {
         this._type = evt.target.value;
         this._offers = [];
 

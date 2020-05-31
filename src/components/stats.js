@@ -7,30 +7,30 @@ import {getStringWithFirstCapitalLetter} from '../utils/common.js';
 const BAR_HEIGHT = 55;
 
 const renderTimeSpendChart = (timeCtx, events) => {
-  const dataset = {};
-  events.forEach((it) => {
-    const inc = dataset[it.type] ? parseInt(dataset[it.type], 10) : 0;
-    dataset[it.type] = inc + (it.time.end.getTime() - it.time.start.getTime());
+  const typesTimeSpend = {};
+  events.forEach((event) => {
+    const inc = typesTimeSpend[event.type] ? parseInt(typesTimeSpend[event.type], 10) : 0;
+    typesTimeSpend[event.type] = inc + (event.time.end.getTime() - event.time.start.getTime());
   });
 
-  const labels = [];
-  const data = [];
-  Object.entries(dataset).sort(function (a, b) {
+  const chartsLabels = [];
+  const chartsData = [];
+  Object.entries(typesTimeSpend).sort(function (a, b) {
     return b[1] - a[1];
-  }).forEach((it) => {
-    labels.push(it[0].toUpperCase());
-    data.push(Math.round(it[1] / ONE_HOUR_IN_MS));
+  }).forEach((type) => {
+    chartsLabels.push(type[0].toUpperCase());
+    chartsData.push(Math.round(type[1] / ONE_HOUR_IN_MS));
   });
 
-  timeCtx.height = BAR_HEIGHT * labels.length;
+  timeCtx.height = BAR_HEIGHT * chartsLabels.length;
 
   return new Chart(timeCtx, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
     data: {
-      labels,
+      labels: chartsLabels,
       datasets: [{
-        data,
+        data: chartsData,
         backgroundColor: `#ffffff`,
         hoverBackgroundColor: `#ffffff`,
         anchor: `start`,
@@ -91,32 +91,32 @@ const renderTimeSpendChart = (timeCtx, events) => {
 };
 
 const renderTransportChart = (transportCtx, events) => {
-  const dataset = {};
-  events.forEach((it) => {
-    if (TYPES.transfer.includes(getStringWithFirstCapitalLetter(it.type))) {
-      const inc = dataset[it.type] ? parseInt(dataset[it.type], 10) : 0;
-      dataset[it.type] = inc + 1;
+  const typesTransportUsage = {};
+  events.forEach((event) => {
+    if (TYPES.transfer.includes(getStringWithFirstCapitalLetter(event.type))) {
+      const inc = typesTransportUsage[event.type] ? parseInt(typesTransportUsage[event.type], 10) : 0;
+      typesTransportUsage[event.type] = inc + 1;
     }
   });
 
-  const labels = [];
-  const data = [];
-  Object.entries(dataset).sort(function (a, b) {
+  const chartsLabels = [];
+  const chartsData = [];
+  Object.entries(typesTransportUsage).sort(function (a, b) {
     return b[1] - a[1];
-  }).forEach((it) => {
-    labels.push(it[0].toUpperCase());
-    data.push(it[1]);
+  }).forEach((type) => {
+    chartsLabels.push(type[0].toUpperCase());
+    chartsData.push(type[1]);
   });
 
-  transportCtx.height = BAR_HEIGHT * labels.length;
+  transportCtx.height = BAR_HEIGHT * chartsLabels.length;
 
   return new Chart(transportCtx, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
     data: {
-      labels,
+      labels: chartsLabels,
       datasets: [{
-        data,
+        data: chartsData,
         backgroundColor: `#ffffff`,
         hoverBackgroundColor: `#ffffff`,
         anchor: `start`,
@@ -177,30 +177,30 @@ const renderTransportChart = (transportCtx, events) => {
 };
 
 const renderMoneyChart = (moneyCtx, events) => {
-  const dataset = {};
-  events.forEach((it) => {
-    const inc = dataset[it.type] ? parseInt(dataset[it.type], 10) : 0;
-    dataset[it.type] = inc + it.price;
+  const typesMoneySpend = {};
+  events.forEach((event) => {
+    const inc = typesMoneySpend[event.type] ? parseInt(typesMoneySpend[event.type], 10) : 0;
+    typesMoneySpend[event.type] = inc + event.price;
   });
 
-  const labels = [];
-  const data = [];
-  Object.entries(dataset).sort(function (a, b) {
+  const chartsLabels = [];
+  const chartsData = [];
+  Object.entries(typesMoneySpend).sort(function (a, b) {
     return b[1] - a[1];
-  }).forEach((it) => {
-    labels.push(it[0].toUpperCase());
-    data.push(it[1]);
+  }).forEach((type) => {
+    chartsLabels.push(type[0].toUpperCase());
+    chartsData.push(type[1]);
   });
 
-  moneyCtx.height = BAR_HEIGHT * labels.length;
+  moneyCtx.height = BAR_HEIGHT * chartsLabels.length;
 
   return new Chart(moneyCtx, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
     data: {
-      labels,
+      labels: chartsLabels,
       datasets: [{
-        data,
+        data: chartsData,
         backgroundColor: `#ffffff`,
         hoverBackgroundColor: `#ffffff`,
         anchor: `start`,

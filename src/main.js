@@ -9,7 +9,7 @@ import {render, RenderPosition} from './utils/render.js';
 import DestinationsModel from './models/destinations.js';
 import OffersModel from './models/offers.js';
 
-const AUTHORIZATION = `Basic lsdfssd;;rgmrewq`;
+const AUTHORIZATION = `Basic lsdfss;;rgmrewq`;
 
 const api = new API(AUTHORIZATION);
 
@@ -18,6 +18,7 @@ const destinationsModel = new DestinationsModel();
 const offersModel = new OffersModel();
 const statsComponent = new StatsComponent(eventsModel);
 const menuComponent = new MenuComponent();
+const newEventButtonComponent = new NewEventButtonComponent();
 
 const controlsContainer = document.querySelector(`.trip-main__trip-controls`);
 const mainContainer = document.querySelector(`.trip-events`);
@@ -28,7 +29,6 @@ const filterController = new FilterController(controlsContainer, eventsModel);
 filterController.render();
 
 document.querySelector(`.trip-main__event-add-btn`).remove();
-const newEventButtonComponent = new NewEventButtonComponent();
 render(controlsContainer.parentElement, newEventButtonComponent, RenderPosition.BEFOREEND);
 
 const tripController = new TripController(mainContainer, eventsModel, destinationsModel, offersModel, filterController, api);

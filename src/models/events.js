@@ -27,10 +27,10 @@ class Events {
     if (events.length !== 0) {
       const firstDay = getSortEvents(this._events, SortType.DEFAULT)[0].time.start;
       firstDay.setHours(0, 0, 0, 0);
-      events.forEach((it) => {
-        const startTime = it.time.start;
+      events.forEach((event) => {
+        const startTime = event.time.start;
         const day = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
-        it.day = (day.getTime() - firstDay.getTime()) / ONE_DAY_IN_MS + 1;
+        event.day = (day.getTime() - firstDay.getTime()) / ONE_DAY_IN_MS + 1;
       });
     }
 
@@ -44,8 +44,8 @@ class Events {
   }
 
   updateEvent(id, event) {
-    const index = this._events.findIndex((it) => {
-      return it.id === id;
+    const index = this._events.findIndex((modelsEvent) => {
+      return modelsEvent.id === id;
     });
 
     if (index === -1) {
@@ -60,8 +60,8 @@ class Events {
   }
 
   removeEvent(id) {
-    const index = this._events.findIndex((it) => {
-      return it.id === id;
+    const index = this._events.findIndex((modelsEvent) => {
+      return modelsEvent.id === id;
     });
 
     if (index === -1) {
