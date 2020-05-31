@@ -22,15 +22,17 @@ class Events {
   }
 
   getEventsWithDays() {
-    let events = this.getEvents();
-    const firstDay = getSortEvents(this._events, SortType.DEFAULT)[0].time.start;
-    firstDay.setHours(0, 0, 0, 0);
+    const events = this.getEvents();
 
-    events.forEach((it) => {
-      const startTime = it.time.start;
-      const day = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
-      it.day = (day.getTime() - firstDay.getTime()) / ONE_DAY_IN_MS + 1;
-    });
+    if (events.length !== 0) {
+      const firstDay = getSortEvents(this._events, SortType.DEFAULT)[0].time.start;
+      firstDay.setHours(0, 0, 0, 0);
+      events.forEach((it) => {
+        const startTime = it.time.start;
+        const day = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
+        it.day = (day.getTime() - firstDay.getTime()) / ONE_DAY_IN_MS + 1;
+      });
+    }
 
     return events;
   }

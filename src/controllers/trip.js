@@ -53,6 +53,7 @@ class TripController {
   }
 
   _removeEvents() {
+    this._removeCreatingEvent();
     this._eventControllers.forEach((it) => {
       it.destroy();
     });
@@ -90,16 +91,21 @@ class TripController {
   }
 
   renderNoPointsMessage() {
-    if (this._loadingMessageComponent) {
+    if (!this._noPointsMessageComponent) {
       this.removeLoadingMessage();
+      this._removeSortComponent();
+      remove(this._eventsListComponent);
+
+      this._noPointsMessageComponent = new NoPointsMessageComponent();
+      render(this._container, this._noPointsMessageComponent);
     }
-    this._noPointsMessageComponent = new NoPointsMessageComponent();
-    render(this._container, this._noPointsMessageComponent);
   }
 
   removeNoPointsMessage() {
-    remove(this._noPointsMessageComponent);
-    this._noPointsMessageComponent = null;
+    if (this._noPointsMessageComponent) {
+      remove(this._noPointsMessageComponent);
+      this._noPointsMessageComponent = null;
+    }
   }
 
   removeLoadingMessage() {
@@ -107,8 +113,21 @@ class TripController {
     this._loadingMessageComponent = null;
   }
 
+  _removeSortComponent() {
+    remove(this._sortComponent);
+    this._sortComponent = null;
+  }
+
   render() {
+    if (this._eventsModel.getEventsAll().length === 0) {
+      this.renderNoPointsMessage();
+      return;
+    } else {
+      this.removeNoPointsMessage();
+    }
+
     const eventContainer = this._eventsListComponent.getElement();
+    const events = this._eventsModel.getEventsWithDays();
 
     if (!this._sortComponent) {
       this._sortComponent = new SortComponent(this._activeSortType);
@@ -116,31 +135,27 @@ class TripController {
       this._sortComponent.setSortFormChangeHandler(this._onSortChange);
     }
 
-    if (!this._container.contains(this._eventsListComponent.getElement())) {
+    if (!this._container.contains(eventContainer)) {
       render(this._container, this._eventsListComponent, RenderPosition.BEFOREEND);
     }
 
     if (this._activeSortType === SortType.DEFAULT) {
-      const events = this._eventsModel.getEventsWithDays();
-      if (events) {
-        let day = 0;
-        let dayEventsList = null;
+      let day = 0;
+      let dayEventsList = null;
 
-        events.forEach((it) => {
-          if (it.day !== day) {
-            const dayEventsComponent = new DayEventsComponent(it.time.start, it.day);
-            this._dayEventsComponents.push(dayEventsComponent);
-            render(eventContainer, dayEventsComponent, RenderPosition.BEFOREEND);
-            dayEventsList = dayEventsComponent.getElement().querySelector(`.trip-events__list`);
-            day = it.day;
-          }
-          const eventController = new EventController(dayEventsList, this._onDataChange, this._onViewChange, this._destinationsModel, this._offersModel);
-          eventController.render(it, EventControllerMode.DEFAULT);
-          this._eventControllers.push(eventController);
-        });
-      }
+      events.forEach((it) => {
+        if (it.day !== day) {
+          const dayEventsComponent = new DayEventsComponent(it.time.start, it.day);
+          this._dayEventsComponents.push(dayEventsComponent);
+          render(eventContainer, dayEventsComponent, RenderPosition.BEFOREEND);
+          dayEventsList = dayEventsComponent.getElement().querySelector(`.trip-events__list`);
+          day = it.day;
+        }
+        const eventController = new EventController(dayEventsList, this._onDataChange, this._onViewChange, this._destinationsModel, this._offersModel);
+        eventController.render(it, EventControllerMode.DEFAULT);
+        this._eventControllers.push(eventController);
+      });
     } else {
-      const events = this._eventsModel.getEvents();
       const dayEventsComponent = new DayEventsComponent();
       this._dayEventsComponents.push(dayEventsComponent);
       render(eventContainer, dayEventsComponent, RenderPosition.BEFOREEND);
@@ -162,24 +177,34 @@ class TripController {
   }
 
   _onViewChange() {
+    this._removeCreatingEvent();
     this._eventControllers.forEach((it) => {
       it.setDefaultView();
     });
+  }
+
+  _removeCreatingEvent() {
     if (this._creatingEvent) {
       this._eventControllers.pop().destroy();
       this._creatingEvent = null;
     }
   }
 
-  _onDataChange(oldData, newData, eventController = null) {
+  _onDataChange(oldData, newData, eventController, mode = null) {
     if (oldData === EmptyEvent) {
       this._creatingEvent = null;
       if (newData === null) {
         this._eventControllers.pop().destroy();
         this._updateEvents();
       } else {
-        this._eventsModel.addEvent(newData);
-        this._updateEvents();
+        this._api.createEvent(newData)
+          .then((event) => {
+            this._eventsModel.addEvent(event);
+            this._updateEvents();
+          })
+          .catch(() => {
+            eventController.shake();
+          });
       }
     } else if (newData === null) {
       this._api.deleteEvent(oldData.id)
@@ -188,18 +213,24 @@ class TripController {
           if (index !== -1) {
             this._updateEvents();
           }
+        })
+        .catch(() => {
+          eventController.shake();
         });
     } else {
       this._api.updateEvent(oldData.id, newData)
         .then((event) => {
           const index = this._eventsModel.updateEvent(oldData.id, event);
           if (index !== -1) {
-            if (eventController) {
+            if (mode === Mode.EDIT) {
               eventController.render(event, Mode.EDIT);
             } else {
               this._updateEvents();
             }
           }
+        })
+        .catch(() => {
+          eventController.shake();
         });
     }
   }

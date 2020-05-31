@@ -91,6 +91,21 @@ class API {
     })
     .then((response) => this._checkStatus(response));
   }
+
+  createEvent(event) {
+    const headers = new Headers();
+    headers.append(`Authorization`, this._authorization);
+    headers.append(`Content-Type`, `application/json`);
+
+    return fetch(Url.EVENTS, {
+      method: `POST`,
+      body: JSON.stringify(event.toRAW()),
+      headers,
+    })
+    .then((response) => this._checkStatus(response))
+    .then((response) => response.json())
+    .then((responseData) => Event.parseEvent(responseData));
+  }
 }
 
 export default API;

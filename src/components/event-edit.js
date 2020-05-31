@@ -2,9 +2,16 @@ import {TYPES} from '../сonst.js';
 import {getEventWithAction} from './event.js';
 import {getDualFormat, getIsoTimeFormat, getStringWithFirstCapitalLetter} from '../utils/common.js';
 import AbstractSmartComponent from '../components/abstract-smart-component.js';
+import TimeValidationMessageComponent from '../components/time-validation-message.js';
 import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
+import { render, remove } from '../utils/render.js';
+
+const DefaultData = {
+  deleteButtonText: `Delete`,
+  saveButtonText: `Save`,
+};
 
 const getEventItemsTemplate = (type, group) => {
   return TYPES[group].map((it) => {
@@ -113,12 +120,14 @@ const getFavoriteAndEditButtons = (id, isFavorite) => {
 };
 
 const getEventEditTemplate = (event, allDestinations, typesOffers, options = {}) => {
-  const {id, time, price} = event;
+  const {id} = event;
 
-  const {type, offers, destination} = options;
+  const {type, offers, destination, price, time, externalData} = options;
   const startTime = getFormatedTime(time.start);
   const endTime = getFormatedTime(time.end);
   const isFavorite = event.isFavorite ? ` checked` : ``;
+  const saveButtonText = externalData.saveButtonText;
+  const deleteButtonText = externalData.deleteButtonText;
 
   const getMainForm = () => {
     return (
@@ -168,8 +177,8 @@ const getEventEditTemplate = (event, allDestinations, typesOffers, options = {})
             </label>
             <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price ? price : ``}">
           </div>
-          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">${id ? `Delete` : `Cancel`}</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit">${saveButtonText}</button>
+          <button class="event__reset-btn" type="reset">${id ? `${deleteButtonText}` : `Cancel`}</button>
           ${getFavoriteAndEditButtons(id, isFavorite)}
         </header>
         ${getEventDetailsTemplate(offers, typesOffers, destination)}
@@ -196,15 +205,21 @@ class EventEdit extends AbstractSmartComponent {
     this._destination = event.destination;
     this._type = event.type;
     this._offers = event.offers;
+    this._price = event.price;
+    this._time = event.time;
 
     this._flatpickres = [];
 
     this._allDestinations = destinations;
     this._allOffers = offers;
 
+    this._externalData = DefaultData;
+
     this._editFormSubmitHandler = null;
     this._favoriteButtonClickHandler = null;
     this._deleteButtonClickHandler = null;
+
+    this._timeValid = null;
 
     this._onTimeChange = this._onTimeChange.bind(this);
 
@@ -219,6 +234,9 @@ class EventEdit extends AbstractSmartComponent {
       type: this._type,
       offers: this._offers,
       destination: this._destination,
+      price: this._price,
+      time: this._time,
+      externalData: this._externalData,
     });
   }
 
@@ -238,11 +256,9 @@ class EventEdit extends AbstractSmartComponent {
 
   _parseFormData(formData) {
     const type = formData.get(`event-type`);
-    const rawStartTime = formData.get(`event-start-time`);
-    const rawEndTime = formData.get(`event-end-time`);
 
     const offersCheckboxes = this.getElement().querySelectorAll(`.event__offer-checkbox`);
-    let checkedOffersTitles = [];
+    const checkedOffersTitles = [];
 
     for (const checkbox of Array.from(offersCheckboxes)) {
       if (checkbox.checked) {
@@ -258,8 +274,8 @@ class EventEdit extends AbstractSmartComponent {
     return {
       price: parseInt(formData.get(`event-price`), 10),
       time: {
-        start: new Date(getIsoTimeFormat(rawStartTime)),
-        end: new Date(getIsoTimeFormat(rawEndTime)),
+        start: this._flatpickres[0].latestSelectedDateObj,
+        end: this._flatpickres[1].latestSelectedDateObj,
       },
       destination: this._getDestination(formData.get(`event-destination`)),
       offers,
@@ -286,7 +302,7 @@ class EventEdit extends AbstractSmartComponent {
   }
 
   _applyFlatpickr() {
-    if (this._flatpickr) {
+    if (this._flatpickres) {
       this._flatpickres.forEach((it) => {
         it.destroy();
       });
@@ -299,16 +315,50 @@ class EventEdit extends AbstractSmartComponent {
     this._flatpickres.push(flatpickr(timeStartInput, {
       enableTime: true,
       dateFormat: `d/m/y H:i`,
-      defaultDate: this._event.time.start,
+      defaultDate: this._time.start,
+      onChange: this._onTimeChange,
     }));
     this._flatpickres.push(flatpickr(timeEndInput, {
       enableTime: true,
       dateFormat: `d/m/y H:i`,
-      defaultDate: this._event.time.end,
+      defaultDate: this._time.end,
+      onChange: this._onTimeChange,
     }));
   }
 
-  rerender() {
+  disableForm() {
+    this.getElement().querySelectorAll(`input, button`).forEach((it) => {
+      it.setAttribute(`disabled`, `disabled`);
+    });
+    if (this._favoriteButtonClickHandler) {
+      this.removeFavoriteButtonClickHandler();
+    }
+  }
+
+  enableForm() {
+    this.getElement().querySelectorAll(`input, button`).forEach((it) => {
+      it.removeAttribute(`disabled`);
+    });
+    if (this._favoriteButtonClickHandler) {
+      this.setFavoriteButtonClickHandler(this._favoriteButtonClickHandler);
+    }
+  }
+
+  setData(data) {
+    this._externalData = Object.assign({}, DefaultData, data);
+    this.rerender();
+  }
+
+  rerender(isSave = true) {
+    if (isSave) {
+      const tempData = this.getData();
+      this._price = tempData.price;
+      this._time = tempData.time;
+      this._destination = tempData.destination;
+      this._offers = tempData.offers;
+      this._type = tempData.type;
+    }
+
     super.rerender();
 
     this._applyFlatpickr();
@@ -328,8 +378,10 @@ class EventEdit extends AbstractSmartComponent {
     this._destination = this._event.destination;
     this._type = this._event.type;
     this._offers = this._event.offers;
+    this._price = this._event.price;
+    this._time = this._event.time;
 
-    this.rerender();
+    this.rerender(false);
   }
 
   getData() {
@@ -350,6 +402,10 @@ class EventEdit extends AbstractSmartComponent {
     this._favoriteButtonClickHandler = handler;
   }
 
+  removeFavoriteButtonClickHandler() {
+    this.getElement().querySelector(`.event__favorite-btn`).removeEventListener(`click`, this._favoriteButtonClickHandler);
+  }
+
   setDeleteButtonClickHandler(handler) {
     this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, handler);
 
@@ -360,30 +416,34 @@ class EventEdit extends AbstractSmartComponent {
     const element = this.getElement();
     const destinationInput = element.querySelector(`.event__input--destination`);
     const priceInput = element.querySelector(`.event__input--price`);
-    const dateInputs = element.querySelectorAll(`.flatpickr-input`);
+    const dateInputs = element.querySelectorAll(`.event__input--time`);
 
     destinationInput.checkValidity();
-    dateInputs.forEach((it) => {
-      it.checkValidity();
-    });
     priceInput.checkValidity();
+    if (this._timeValid) {
+      render(this.getElement().querySelector(`.event__field-group--time`), this._timeValid);
+      dateInputs.forEach((it) => {
+        it.style.outline = `2px solid red`;
+      });
+      return true;
+    }
+
+    return false;
   }
 
   _onTimeChange() {
-    const element = this.getElement();
-    const timeInputs = element.querySelectorAll(`.flatpickr-input`);
-
-    const timeEnd = new Date(getIsoTimeFormat(element.querySelector(`[name=event-end-time]`).value));
-    const timeStart = new Date(getIsoTimeFormat(element.querySelector(`[name=event-start-time]`).value));
+    const timeEnd = this._flatpickres[1].latestSelectedDateObj;
+    const timeStart = this._flatpickres[0].latestSelectedDateObj;
+    const dateInputs = this.getElement().querySelectorAll(`.event__input--time`);
 
     if (timeStart.getTime() <= timeEnd.getTime()) {
-      timeInputs.forEach((it) => {
-        it.setCustomValidity(``);
+      remove(this._timeValid);
+      this._timeValid = null;
+      dateInputs.forEach((it) => {
+        it.style.outline = ``;
       });
     } else {
-      timeInputs.forEach((it) => {
-        it.setCustomValidity(`Дата окончания не может быть меньше даты начала события`);
-      });
+      this._timeValid = new TimeValidationMessageComponent();
     }
   }
 
@@ -408,10 +468,6 @@ class EventEdit extends AbstractSmartComponent {
       } else {
         evt.target.setCustomValidity(`Пожалуйста сделайте выбор из списка предложенных пунктов назначения`);
       }
-    });
-
-    element.querySelectorAll(`.event__input--time`).forEach((it) => {
-      it.addEventListener(`change`, this._onTimeChange);
     });
 
     element.querySelector(`.event__input--price`).addEventListener(`change`, (evt) => {

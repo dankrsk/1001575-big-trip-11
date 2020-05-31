@@ -7,20 +7,22 @@ import {getStringWithFirstCapitalLetter} from '../utils/common.js';
 const BAR_HEIGHT = 55;
 
 const renderTimeSpendChart = (timeCtx, events) => {
-  let dataset = {};
+  const dataset = {};
   events.forEach((it) => {
     const inc = dataset[it.type] ? parseInt(dataset[it.type], 10) : 0;
     dataset[it.type] = inc + (it.time.end.getTime() - it.time.start.getTime());
   });
 
-  let labels = [];
-  let data = [];
+  const labels = [];
+  const data = [];
   Object.entries(dataset).sort(function (a, b) {
     return b[1] - a[1];
   }).forEach((it) => {
     labels.push(it[0].toUpperCase());
     data.push(Math.round(it[1] / ONE_HOUR_IN_MS));
   });
+
+  timeCtx.height = BAR_HEIGHT * labels.length;
 
   return new Chart(timeCtx, {
     plugins: [ChartDataLabels],
@@ -89,7 +91,7 @@ const renderTimeSpendChart = (timeCtx, events) => {
 };
 
 const renderTransportChart = (transportCtx, events) => {
-  let dataset = {};
+  const dataset = {};
   events.forEach((it) => {
     if (TYPES.transfer.includes(getStringWithFirstCapitalLetter(it.type))) {
       const inc = dataset[it.type] ? parseInt(dataset[it.type], 10) : 0;
@@ -97,14 +99,16 @@ const renderTransportChart = (transportCtx, events) => {
     }
   });
 
-  let labels = [];
-  let data = [];
+  const labels = [];
+  const data = [];
   Object.entries(dataset).sort(function (a, b) {
     return b[1] - a[1];
   }).forEach((it) => {
     labels.push(it[0].toUpperCase());
     data.push(it[1]);
   });
+
+  transportCtx.height = BAR_HEIGHT * labels.length;
 
   return new Chart(transportCtx, {
     plugins: [ChartDataLabels],
@@ -173,14 +177,14 @@ const renderTransportChart = (transportCtx, events) => {
 };
 
 const renderMoneyChart = (moneyCtx, events) => {
-  let dataset = {};
+  const dataset = {};
   events.forEach((it) => {
     const inc = dataset[it.type] ? parseInt(dataset[it.type], 10) : 0;
     dataset[it.type] = inc + it.price;
   });
 
-  let labels = [];
-  let data = [];
+  const labels = [];
+  const data = [];
   Object.entries(dataset).sort(function (a, b) {
     return b[1] - a[1];
   }).forEach((it) => {

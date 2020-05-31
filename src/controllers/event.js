@@ -3,7 +3,7 @@ import EventEditComponent from '../components/event-edit.js';
 import EventModel from '../models/event.js';
 import {render, replace, remove, RenderPosition} from '../utils/render.js';
 
-const DEFAULT_TYPE = `flight`;
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 const Mode = {
   ADDING: `adding`,
@@ -11,18 +11,7 @@ const Mode = {
   EDIT: `edit`,
 };
 
-const EmptyEvent = {
-  price: null,
-  time: {
-    start: new Date(),
-    end: new Date(),
-  },
-  destination: null,
-  id: null,
-  isFavorite: null,
-  offers: null,
-  type: DEFAULT_TYPE,
-};
+const EmptyEvent = new EventModel();
 
 class EventController {
   constructor(container, onDataChange, onViewChange, destinationsModel, offersModel) {
@@ -62,7 +51,12 @@ class EventController {
   _subscribeOnEvents(event) {
     this._eventEditComponent.setEditFormSubmitHandler((evt) => {
       evt.preventDefault();
+
       if (!this._eventEditComponent.checkValidity()) {
+        this._eventEditComponent.setData({
+          saveButtonText: `Saving...`,
+        });
+
         const data = this._eventEditComponent.getData();
         const newEvent = EventModel.clone(event);
         newEvent.price = data.price;
@@ -71,12 +65,17 @@ class EventController {
         newEvent.offers = data.offers;
         newEvent.type = data.type;
 
-        this._onDataChange(event, newEvent);
+        this._eventEditComponent.disableForm();
+        this._onDataChange(event, newEvent, this);
       }
     });
 
     this._eventEditComponent.setDeleteButtonClickHandler(() => {
-      this._onDataChange(event, null);
+      this._eventEditComponent.setData({
+        deleteButtonText: `Deleting...`,
+      });
+      this._eventEditComponent.disableForm();
+      this._onDataChange(event, null, this);
     });
 
     if (this._mode !== Mode.ADDING) {
@@ -88,9 +87,28 @@ class EventController {
       this._eventEditComponent.setFavoriteButtonClickHandler(() => {
         const newEvent = EventModel.clone(event);
         newEvent.isFavorite = !newEvent.isFavorite;
-        this._onDataChange(event, newEvent, this);
+        this._onDataChange(event, newEvent, this, Mode.EDIT);
       });
     }
+  }
+
+  shake() {
+    this._eventEditComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    if (this._eventComponent) {
+      this._eventComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    }
+
+    setTimeout(() => {
+      this._eventEditComponent.getElement().style.animation = ``;
+      if (this._eventComponent) {
+        this._eventComponent.getElement().style.animation = ``;
+      }
+      this._eventEditComponent.enableForm();
+      this._eventEditComponent.setData({
+        saveButtonText: `Save`,
+        deleteButtonText: `Delete`,
+      });
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   destroy() {
@@ -113,7 +131,11 @@ class EventController {
         replace(this._eventEditComponent, oldEventEditComponent);
         break;
       case Mode.ADDING:
-        render(this._container.querySelector(`.trip-days`), this._eventEditComponent, RenderPosition.BEFOREBEGIN);
+        if (this._container.querySelector(`.trip-days`)) {
+          render(this._container.querySelector(`.trip-days`), this._eventEditComponent, RenderPosition.BEFOREBEGIN);
+        } else {
+          render(this._container, this._eventEditComponent, RenderPosition.AFTERBEGIN);
+        }
         break;
     }
   }

@@ -9,7 +9,7 @@ import {render, RenderPosition} from './utils/render.js';
 import DestinationsModel from './models/destinations.js';
 import OffersModel from './models/offers.js';
 
-const AUTHORIZATION = `Basic lskf;;rgmrewq`;
+const AUTHORIZATION = `Basic lsdfssd;;rgmrewq`;
 
 const api = new API(AUTHORIZATION);
 
